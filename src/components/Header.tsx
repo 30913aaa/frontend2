@@ -1,18 +1,20 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faCalendarWeek } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faCalendarWeek, faPlus } from '@fortawesome/free-solid-svg-icons';
 import useCalendarStore from '../store/calendarStore';
 import { Language } from '../types';
 
 interface HeaderProps {
   onSearchClick: () => void;
+  isAddEventOpen?: boolean;
+  setIsAddEventOpen?: (isOpen: boolean) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onSearchClick }) => {
+const Header: React.FC<HeaderProps> = ({ onSearchClick, isAddEventOpen, setIsAddEventOpen }) => {
   const { language, setLanguage } = useCalendarStore();
   const translations = {
     en: { title: 'School Calendar' },
-    zh: { title: '學校日曆' }
+    zh: { title: '學校日曆' },
   };
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -33,6 +35,16 @@ const Header: React.FC<HeaderProps> = ({ onSearchClick }) => {
         >
           <FontAwesomeIcon icon={faSearch} />
         </button>
+        {setIsAddEventOpen && (
+          <button
+            onClick={() => setIsAddEventOpen(true)}
+            className="p-2 hover:bg-gray-100 rounded-full"
+            aria-label="Add event"
+            title={language === 'zh' ? '新增事件' : 'Add Event'}
+          >
+            <FontAwesomeIcon icon={faPlus} />
+          </button>
+        )}
         <button className="p-2 hover:bg-gray-100 rounded-full" aria-label="Toggle view">
           <FontAwesomeIcon icon={faCalendarWeek} />
         </button>

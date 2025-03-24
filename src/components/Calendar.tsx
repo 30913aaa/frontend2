@@ -26,10 +26,15 @@ const Calendar: React.FC = () => {
   // 定義事件類型與小點顏色的映射
   const getDotColor = (type: Event['type']) => {
     const colors = {
-      'important-exam': 'bg-red-500', // 紅色小點
-      'school-activity': 'bg-blue-500', // 藍色小點
-      'announcement': 'bg-yellow-500', // 
-      'holiday': 'bg-green-500', //
+      'important-exam': 'bg-red-500', // 紅色
+    'school-activity': 'bg-blue-500', // 藍色
+    'announcement': 'bg-yellow-500', // 黃色
+    'holiday': 'bg-green-500', // 綠色
+    'meeting': 'bg-purple-500', // 紫色
+    'exam': 'bg-orange-500', // 橙色
+    'lecture': 'bg-teal-500', // 青色
+    'uniform-inspection': 'bg-pink-500', // 粉色
+    'other': 'bg-gray-500', // 灰色
     };
     return colors[type];
   };
