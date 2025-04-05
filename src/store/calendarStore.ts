@@ -6,10 +6,10 @@ interface CalendarState {
   currentMonth: number;
   language: Language;
   events: Event[];
-  
   selectedDate: string | null;
   isEventListVisible: boolean;
-  
+  user: { id: string; role: string } | null;
+  isLoggedIn: boolean;
   setLanguage: (lang: Language) => void;
   prevMonth: () => void;
   nextMonth: () => void;
@@ -20,15 +20,23 @@ interface CalendarState {
   addEvent: (event: Omit<Event, 'id'>) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   updateEvent: (event: Event) => Promise<void>;
+  login: (username: string, password: string) => void;
+  logout: () => void;
 }
 
-const useCalendarStore = create<CalendarState>((set, get) => ({
+// 硬編碼的帳號和密碼
+const validUsername = 'aa';
+const validPassword = 'aaa';
+
+const useCalendarStore = create<CalendarState>((set) => ({
   currentYear: new Date().getFullYear(),
   currentMonth: new Date().getMonth(),
   language: 'zh' as Language,
   events: [],
   selectedDate: null,
   isEventListVisible: true,
+  user: null,
+  isLoggedIn: false,
   setLanguage: (lang) => set({ language: lang }),
   prevMonth: () => set((state) => {
     const newMonth = state.currentMonth === 0 ? 11 : state.currentMonth - 1;
@@ -59,10 +67,13 @@ const useCalendarStore = create<CalendarState>((set, get) => ({
   },
   addEvent: async (newEvent) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('未登入');
       const response = await fetch('https://school-calendar-backend.onrender.com/admin/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           start: newEvent.start,
@@ -78,14 +89,18 @@ const useCalendarStore = create<CalendarState>((set, get) => ({
       set((state) => ({ events: [...state.events, addedEvent] }));
     } catch (error) {
       console.error('Error adding event:', error);
+      alert('請先登入以新增事件');
     }
   },
   deleteEvent: async (id) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('未登入');
       const response = await fetch('https://school-calendar-backend.onrender.com/admin/delete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ id }),
       });
@@ -93,14 +108,18 @@ const useCalendarStore = create<CalendarState>((set, get) => ({
       set((state) => ({ events: state.events.filter((e) => e.id !== id) }));
     } catch (error) {
       console.error('Error deleting event:', error);
+      alert('請先登入以刪除事件');
     }
   },
   updateEvent: async (updatedEvent) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('未登入');
       const response = await fetch('https://school-calendar-backend.onrender.com/admin/update/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           id: updatedEvent.id,
@@ -118,7 +137,22 @@ const useCalendarStore = create<CalendarState>((set, get) => ({
       }));
     } catch (error) {
       console.error('Error updating event:', error);
+      alert('請先登入以修改事件');
     }
+  },
+  login: (username, password) => {
+    if (username === validUsername && password === validPassword) {
+      const user = { id: 'hardcoded-user', role: 'admin' }; // 假設角色為 admin
+      set({ user, isLoggedIn: true });
+      localStorage.setItem('token', 'hardcoded-token'); // 模擬令牌
+      alert('登入成功');
+    } else {
+      alert('帳號或密碼錯誤');
+    }
+  },
+  logout: () => {
+    set({ user: null, isLoggedIn: false });
+    localStorage.removeItem('token');
   },
 }));
 

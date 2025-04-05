@@ -6,10 +6,10 @@ import useCalendarStore from '../store/calendarStore';
 import { Event } from '../types';
 
 const EventList: React.FC = () => {
-  const { events, language, isEventListVisible, deleteEvent, updateEvent, selectedDate } = useCalendarStore();
+  const { events, language, isEventListVisible, deleteEvent, updateEvent, selectedDate, setSelectedDate, isLoggedIn, user } = useCalendarStore();
   const [contextMenu, setContextMenu] = useState<{ eventId: string; x: number; y: number } | null>(null);
   const [editEvent, setEditEvent] = useState<Event | null>(null);
-  const [selectedType, setSelectedType] = useState<string>(''); // 添加事件類型過濾狀態
+  const [selectedType, setSelectedType] = useState<string>('');
 
   const translations = {
     en: {
@@ -73,8 +73,17 @@ const EventList: React.FC = () => {
     return colors[type] || 'var(--event-other, #6b7280)';
   };
 
+  // 在組件載入時設定 selectedDate 為今日日期（如果尚未設定）
+  useEffect(() => {
+    if (!selectedDate) {
+      const today = new Date().toISOString().split('T')[0]; // 格式為 YYYY-MM-DD，例如 "2025-04-04"
+      setSelectedDate(today);
+    }
+  }, [selectedDate, setSelectedDate]);
+
   const handleContextMenu = (e: React.MouseEvent, eventId: string) => {
     e.preventDefault();
+    if (!isLoggedIn || user?.role !== 'admin') return; // 未登入或非管理員無法顯示右鍵選單
     if (contextMenu) {
       setContextMenu(null);
     } else {
@@ -99,9 +108,8 @@ const EventList: React.FC = () => {
     }
   };
 
-  // 檢查事件是否在選定的日期範圍內
   const isEventInDate = (event: Event, dateString: string) => {
-    if (!dateString) return true; // 如果沒有選擇日期，返回所有事件
+    if (!dateString) return true;
     
     const selectedDate = new Date(dateString);
     selectedDate.setHours(0, 0, 0, 0);
@@ -112,18 +120,15 @@ const EventList: React.FC = () => {
     const eventEnd = event.end ? new Date(event.end) : new Date(event.start);
     eventEnd.setHours(0, 0, 0, 0);
     
-    // 檢查選定日期是否在事件的開始和結束日期之間
     return selectedDate >= eventStart && selectedDate <= eventEnd;
   };
 
-  // 過濾事件：同時考慮類型和日期
   const filteredEvents = events.filter(event => {
     const matchesType = selectedType ? event.type === selectedType : true;
     const matchesDate = selectedDate ? isEventInDate(event, selectedDate) : true;
     return matchesType && matchesDate;
   });
 
-  // 格式化日期顯示
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -159,7 +164,7 @@ const EventList: React.FC = () => {
       <h2 className="text-xl font-semibold mb-6">
         {selectedDate ? 
           `${translations[language].eventsForDate} ${formatDate(selectedDate)}` : 
-          translations[language].allEvents}
+          translations[language].todayEvents}
       </h2>
       
       {filteredEvents.length === 0 ? (
@@ -213,7 +218,7 @@ const EventList: React.FC = () => {
                   )}
                 </div>
               </details>
-              {contextMenu && contextMenu.eventId === event.id && (
+              {contextMenu && contextMenu.eventId === event.id && isLoggedIn && user?.role === 'admin' && (
                 <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border rounded-lg shadow-lg p-2 z-50">
                   <button
                     onClick={() => handleEdit(filteredEvents.find(e => e.id === contextMenu.eventId)!)}
@@ -233,7 +238,7 @@ const EventList: React.FC = () => {
           ))}
         </div>
       )}
-      {editEvent && (
+      {editEvent && isLoggedIn && user?.role === 'admin' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-xl font-semibold mb-4">{translations[language].edit}</h3>

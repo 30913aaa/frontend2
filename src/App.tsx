@@ -11,7 +11,7 @@ import useCalendarStore from './store/calendarStore';
 function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false); // 添加狀態
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const { isEventListVisible, fetchEvents, addEvent, language } = useCalendarStore();
 
   useEffect(() => {
@@ -39,7 +39,7 @@ function App() {
     );
   };
 
-  // 新增事件表單組件（從 AdminPage 複製過來）
+  // 新增事件表單組件
   const AddEventForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const [titleZh, setTitleZh] = useState('');
     const [titleEn, setTitleEn] = useState('');

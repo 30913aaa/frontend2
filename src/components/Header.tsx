@@ -11,7 +11,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onSearchClick, isAddEventOpen, setIsAddEventOpen }) => {
-  const { language, setLanguage } = useCalendarStore();
+  const { language, setLanguage, isLoggedIn, user } = useCalendarStore();
+
   const translations = {
     en: { title: 'School Calendar' },
     zh: { title: '學校日曆' },
@@ -35,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ onSearchClick, isAddEventOpen, setIsAdd
         >
           <FontAwesomeIcon icon={faSearch} />
         </button>
-        {setIsAddEventOpen && (
+        {setIsAddEventOpen && isLoggedIn && user?.role === 'admin' && (
           <button
             onClick={() => setIsAddEventOpen(true)}
             className="p-2 hover:bg-gray-100 rounded-full"

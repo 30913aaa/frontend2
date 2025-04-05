@@ -1,36 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import Navigation from './Navigation';
 import Calendar from './Calendar';
 import EventList from './EventList';
+import Login from './Login'; // 引入 Login 組件
 import useCalendarStore from '../store/calendarStore';
 
 const AdminPage: React.FC = () => {
-  const { isEventListVisible } = useCalendarStore();
+  const { isEventListVisible, setSelectedDate, isLoggedIn } = useCalendarStore();
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setSelectedDate(today);
+  }, [setSelectedDate]);
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header
-        onSearchClick={() => {}}
-        isAddEventOpen={isAddEventOpen}
-        setIsAddEventOpen={setIsAddEventOpen}
-      />
-      <div className="relative">
-        <Navigation />
-      </div>
-      <main className="p-4 flex flex-col md:flex-row gap-4">
-        <div className="flex-grow">
-          <Calendar />
-        </div>
-        {isEventListVisible && <EventList />}
-      </main>
-      {isAddEventOpen && <AddEventForm onClose={() => setIsAddEventOpen(false)} />}
+      {!isLoggedIn && <Login />} {/* 未登入時顯示登入畫面 */}
+      {isLoggedIn && (
+        <>
+          <Header
+            onSearchClick={() => {}}
+            isAddEventOpen={isAddEventOpen}
+            setIsAddEventOpen={setIsAddEventOpen}
+          />
+          <div className="relative">
+            <Navigation />
+          </div>
+          <main className="p-4 flex flex-col md:flex-row gap-4">
+            <div className="flex-grow">
+              <Calendar />
+            </div>
+            {isEventListVisible && <EventList />}
+          </main>
+          {isAddEventOpen && <AddEventForm onClose={() => setIsAddEventOpen(false)} />}
+        </>
+      )}
     </div>
   );
 };
 
-// 新增事件表單組件（保持不變）
+// AddEventForm 組件保持不變
 const AddEventForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { language, addEvent } = useCalendarStore();
   const [titleZh, setTitleZh] = useState('');

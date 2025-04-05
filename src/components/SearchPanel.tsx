@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import useCalendarStore from '../store/calendarStore';
 
 interface SearchPanelProps {
@@ -23,7 +25,8 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => {
       dateRange: 'Date Range',
       search: 'Search',
       reset: 'Reset',
-      cancel: 'Cancel'
+      cancel: 'Cancel',
+      close: 'Close'
     },
     zh: {
       title: '進階搜尋',
@@ -33,7 +36,8 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => {
       dateRange: '時間範圍',
       search: '查詢',
       reset: '重置',
-      cancel: '取消'
+      cancel: '取消',
+      close: '關閉'
     }
   };
 
@@ -55,7 +59,16 @@ const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 className="text-xl font-semibold mb-4">{translations[language].title}</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">{translations[language].search}</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+            aria-label={translations[language].close}
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+        </div>
         
         <div className="space-y-4">
           <div>
